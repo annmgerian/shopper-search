@@ -3,52 +3,14 @@ import Filter from "./Filter";
 import {connect} from 'react-redux';
 import {setData} from "../../redux/actions";
 
-const startData = [
-    {
-        "fromName": "Berlin, Germany",
-        "toName": "Kyiv, Ukraine",
-        "departAt": "2019-05-29T00:00:00.000Z",
-        "vehicle": "plane"
-    },
-    {
-        "fromName": "Berlin, Germany",
-        "toName": "Dnipro, Ukraine",
-        "departAt": "2019-06-02T00:00:00.000Z",
-        "vehicle": "car"
-    },
-    {
-        "fromName": "London, UK",
-        "toName": "Kyiv, Ukraine",
-        "departAt": "2019-06-07T00:00:00.000Z",
-        "vehicle": "plane"
-    },
-    {
-        "fromName": "Lyon, France",
-        "toName": "Kyiv, Ukraine",
-        "departAt": "2019-06-07T00:00:00.000Z",
-        "vehicle": "plane"
-    },
-    {
-        "fromName": "Moscow, Russia",
-        "toName": "Kyiv, Ukraine",
-        "departAt": "2019-06-08T00:00:00.000Z",
-        "vehicle": "car"
-    },
-    {
-        "fromName": "Kyiv, Ukraine",
-        "toName": "Berlin, Germany",
-        "departAt": "2019-05-30T00:00:00.000Z",
-        "vehicle": "train"
-    }
-];
-
 class FilterContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             arrivalPoints: [],
             departurePoints: [],
-            pointFilter: {arrival: [], departure: []}
+            pointFilter: {arrival: [], departure: []},
+            data:{}
         };
         this.filterByArrival = this.filterByArrival.bind(this);
         this.filterByDeparture = this.filterByDeparture.bind(this);
@@ -56,7 +18,7 @@ class FilterContainer extends React.Component {
     }
 
     filterByArrival(point) {
-        const {pointFilter} = this.state;
+        const {pointFilter,data} = this.state;
         let el = pointFilter.arrival.indexOf(point);
         if (el === -1)
             pointFilter.arrival.push(point);
@@ -64,16 +26,16 @@ class FilterContainer extends React.Component {
             pointFilter.arrival.splice(el, 1);
         if (pointFilter.arrival.length !== 0) {
             let newData = [];
-            startData.forEach(object => {
+            data.forEach(object => {
                 if (pointFilter.arrival.indexOf(object.toName) !== -1)
                     newData.push(object)
             });
             this.props.setData(newData);
         } else if (pointFilter.departure.length === 0)
-            this.props.setData(startData);
+            this.props.setData(data);
         else {
             let newData = [];
-            startData.forEach(object => {
+            data.forEach(object => {
                 if (pointFilter.departure.indexOf(object.fromName) !== -1)
                     newData.push(object)
             });
@@ -83,7 +45,7 @@ class FilterContainer extends React.Component {
     }
 
     filterByDeparture(point) {
-        const {pointFilter} = this.state;
+        const {pointFilter,data} = this.state;
         let el = pointFilter.departure.indexOf(point);
         if (el === -1)
             pointFilter.departure.push(point);
@@ -91,16 +53,16 @@ class FilterContainer extends React.Component {
             pointFilter.departure.splice(el, 1);
         if (pointFilter.departure.length !== 0) {
             let newData = [];
-            startData.forEach(object => {
+            data.forEach(object => {
                 if (pointFilter.departure.indexOf(object.fromName) !== -1)
                     newData.push(object)
             });
             this.props.setData(newData);
         } else if (pointFilter.arrival.length === 0)
-            this.props.setData(startData);
+            this.props.setData(data);
         else {
             let newData = [];
-            startData.forEach(object => {
+            data.forEach(object => {
                 if (pointFilter.arrival.indexOf(object.toName) !== -1)
                     newData.push(object)
             });
@@ -108,6 +70,12 @@ class FilterContainer extends React.Component {
         }
         this.setState({pointFilter: {...pointFilter, ...pointFilter.departure}});
 
+    }
+
+    async componentDidMount() {
+        let response = await fetch('/api/get-data');
+        let data = await response.json();
+        this.setState({data});
     }
 
     render() {
